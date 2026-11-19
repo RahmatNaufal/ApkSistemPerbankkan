@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav class="navbar" th:fragment="navbar" aria-label="Navigasi utama">
+    <a class="brand" th:href="@{/}" href="/" aria-label="INT BANK — beranda">
+        <span class="brand__mark" aria-hidden="true">◆</span>
+        <span class="brand__text">
+            <strong>INT BANK</strong>
+            <small>Sistem Perbankan</small>
+        </span>
+    </a>
+
+    <!-- Tamu -->
+    <div class="navbar__links" th:unless="${currentUser}">
+        <a class="nav-link" th:href="@{/}" href="/">Beranda</a>
+        <a class="nav-link" th:href="@{/bedah-oop}" href="/bedah-oop">Bedah OOP</a>
+        <a class="nav-link" th:href="@{/login}" href="/login">Masuk</a>
+        <a class="btn btn--accent btn--sm" th:href="@{/register}" href="/register">Daftar <span aria-hidden="true">→</span></a>
+    </div>
+
+    <!-- Nasabah -->
+    <div class="navbar__links" th:if="${currentUser == true and isAdmin != true}">
+        <a class="nav-link" th:href="@{/}" href="/">Beranda</a>
+        <a class="nav-link" th:href="@{/nasabah/dashboard}" href="/nasabah/dashboard">Dashboard</a>
+        <details class="nav-dropdown">
+            <summary class="nav-link">Rekening <span aria-hidden="true">▾</span></summary>
+            <div class="nav-dropdown__menu">
+                <a th:href="@{/nasabah/rekening/buka}" href="/nasabah/rekening/buka">Buka rekening baru</a>
+                <a th:href="@{/nasabah/dashboard}" href="/nasabah/dashboard">Lihat rekening saya</a>
+            </div>
+        </details>
+        <a class="nav-link" th:href="@{/nasabah/transaksi/riwayat}" href="/nasabah/transaksi/riwayat">Riwayat</a>
+        <a class="nav-link" th:href="@{/nasabah/profil}" href="/nasabah/profil">Profil</a>
+    </div>
+
+    <!-- Admin -->
+    <div class="navbar__links" th:if="${currentUser == true and isAdmin == true}">
+        <a class="nav-link" th:href="@{/admin/dashboard}" href="/admin/dashboard">Dashboard Admin</a>
+        <a class="nav-link" th:href="@{/admin/nasabah}" href="/admin/nasabah">Nasabah</a>
+        <a class="nav-link" th:href="@{/admin/transaksi}" href="/admin/transaksi">Transaksi</a>
+        <a class="nav-link" th:href="@{/admin/audit}" href="/admin/audit">Audit</a>
+    </div>
+
+    <div class="navbar__user" th:if="${currentUser == true}">
+        <span class="user-chip" th:text="${userName}">Nama pengguna</span>
+        <form th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit" class="btn btn--secondary btn--sm">Keluar</button>
+        </form>
+    </div>
+
+    <!-- Menu ringkas untuk mobile -->
+    <details class="nav-mobile">
+        <summary class="nav-mobile__toggle" aria-label="Buka menu navigasi">Menu <span aria-hidden="true">☰</span></summary>
+        <div class="nav-mobile__panel">
+            <a class="nav-link" th:href="@{/}" href="/">Beranda</a>
+            <a class="nav-link" th:href="@{/bedah-oop}" href="/bedah-oop">Bedah OOP</a>
+            <th:block th:if="${currentUser == true and isAdmin != true}">
+                <a class="nav-link" th:href="@{/nasabah/dashboard}" href="/nasabah/dashboard">Dashboard</a>
+                <a class="nav-link" th:href="@{/nasabah/rekening/buka}" href="/nasabah/rekening/buka">Buka rekening</a>
+                <a class="nav-link" th:href="@{/nasabah/transaksi/riwayat}" href="/nasabah/transaksi/riwayat">Riwayat</a>
+                <a class="nav-link" th:href="@{/nasabah/profil}" href="/nasabah/profil">Profil</a>
+            </th:block>
+            <th:block th:if="${currentUser == true and isAdmin == true}">
+                <a class="nav-link" th:href="@{/admin/dashboard}" href="/admin/dashboard">Dashboard Admin</a>
+                <a class="nav-link" th:href="@{/admin/nasabah}" href="/admin/nasabah">Nasabah</a>
+                <a class="nav-link" th:href="@{/admin/transaksi}" href="/admin/transaksi">Transaksi</a>
+                <a class="nav-link" th:href="@{/admin/audit}" href="/admin/audit">Audit</a>
+            </th:block>
+            <th:block th:unless="${currentUser}">
+                <a class="nav-link" th:href="@{/login}" href="/login">Masuk</a>
+                <a class="nav-link" th:href="@{/register}" href="/register">Daftar</a>
+            </th:block>
+            <div class="nav-mobile__user" th:if="${currentUser == true}">
+                <span th:text="${userName}">Nama pengguna</span>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn--secondary btn--sm btn--block">Keluar</button>
+                </form>
+            </div>
+        </div>
+    </details>
+</nav>
+</body>
+</html>

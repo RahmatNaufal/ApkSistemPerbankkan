@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Dashboard')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head page-head--row">
+                <div>
+                    <p class="eyebrow">Dashboard nasabah</p>
+                    <h1>Halo, <span th:text="${customerName}">Nasabah</span></h1>
+                    <p class="muted">Ringkasan rekening dan aktivitas terbaru kamu.</p>
+                </div>
+                <a class="btn btn--secondary" th:href="@{/nasabah/rekening/buka}" href="/nasabah/rekening/buka">+ Buka rekening</a>
+            </header>
+
+            <section class="balance-card" aria-labelledby="balance-title">
+                <div>
+                    <p class="balance-card__label" id="balance-title">Total saldo tersedia</p>
+                    <p class="balance-card__amount amount" th:text="${totalBalance}">Rp0</p>
+                    <p class="balance-card__note">Akumulasi seluruh rekening milik kamu · data dari server</p>
+                </div>
+                <span class="balance-card__ornament" aria-hidden="true">◇</span>
+            </section>
+
+            <section class="quick-actions" aria-label="Aksi cepat">
+                <a class="quick-action" th:href="@{/nasabah/transaksi/transfer}" href="/nasabah/transaksi/transfer">
+                    <span class="quick-action__icon" aria-hidden="true">→</span>
+                    <span><strong>Transfer</strong><small>Kirim ke rekening internal</small></span>
+                </a>
+                <a class="quick-action" th:href="@{/nasabah/transaksi/setor}" href="/nasabah/transaksi/setor">
+                    <span class="quick-action__icon" aria-hidden="true">+</span>
+                    <span><strong>Setor</strong><small>Tambah dana simulasi</small></span>
+                </a>
+                <a class="quick-action" th:href="@{/nasabah/transaksi/tarik}" href="/nasabah/transaksi/tarik">
+                    <span class="quick-action__icon" aria-hidden="true">−</span>
+                    <span><strong>Tarik</strong><small>Ambil dana dari rekening</small></span>
+                </a>
+            </section>
+
+            <div class="grid grid--2">
+                <section class="card" aria-labelledby="accounts-title">
+                    <div class="card__head">
+                        <h2 id="accounts-title">Rekening saya</h2>
+                        <span class="muted" th:text="${#lists.size(accounts)} + ' rekening'">0 rekening</span>
+                    </div>
+                    <ul class="list" th:if="${accounts != null and !accounts.isEmpty()}">
+                        <li class="list__item" th:each="account : ${accounts}">
+                            <div class="list__main">
+                                <strong th:text="${account.typeName}">Jenis rekening</strong>
+                                <span class="mono muted" th:text="${account.maskedNumber}">•••• 0000</span>
+                                <span class="mono muted" th:text="${account.accountNumber}">0000000000</span>
+                            </div>
+                            <div class="list__side">
+                                <span class="badge" th:classappend="${account.status != null and account.status == 'ACTIVE'} ? 'badge--success' : 'badge--danger'" th:text="${account.statusLabel}">Aktif</span>
+                                <strong class="amount" th:text="${account.balanceFormatted}">Rp0</strong>
+                                <a class="link-arrow" th:href="@{/nasabah/rekening/{accountNumber}(accountNumber=${account.accountNumber})}" href="/nasabah/rekening/">Detail <span aria-hidden="true">→</span></a>
+                            </div>
+                        </li>
+                    </ul>
+                    <p class="empty-state" th:if="${accounts == null or accounts.isEmpty()}">Belum ada rekening yang bisa ditampilkan.</p>
+                </section>
+
+                <section class="card" aria-labelledby="recent-title">
+                    <div class="card__head">
+                        <h2 id="recent-title">Aktivitas terbaru</h2>
+                        <a class="link-arrow" th:href="@{/nasabah/transaksi/riwayat}" href="/nasabah/transaksi/riwayat">Riwayat lengkap <span aria-hidden="true">→</span></a>
+                    </div>
+                    <ul class="list" th:if="${recentTransactions != null and !recentTransactions.isEmpty()}">
+                        <li class="list__item" th:each="tx : ${recentTransactions}">
+                            <div class="list__main">
+                                <strong>
+                                    <span class="flow-icon" th:text="${tx.direction == 'IN' ? '↓' : (tx.direction == 'OUT' ? '↑' : '•')}" aria-hidden="true">•</span>
+                                    <span th:text="${tx.typeLabel}">Jenis transaksi</span>
+                                </strong>
+                                <span class="muted" th:text="${tx.createdAtFormatted}">Tanggal</span>
+                                <span class="mono muted" th:text="${tx.referenceNumber}">REF</span>
+                            </div>
+                            <div class="list__side">
+                                <strong class="amount" th:text="${tx.amountFormatted}">Rp0</strong>
+                                <span class="badge" th:classappend="${tx.status != null and tx.status == 'SUCCESS'} ? 'badge--success' : 'badge--neutral'" th:text="${tx.statusLabel}">Berhasil</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <p class="empty-state" th:if="${recentTransactions == null or recentTransactions.isEmpty()}">Belum ada transaksi terbaru.</p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

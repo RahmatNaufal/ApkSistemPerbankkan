@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Masuk')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page page--narrow">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+            <div class="alert alert--success" role="status" th:if="${param.registered}">
+                <span class="alert__icon" aria-hidden="true">✓</span>
+                <span>Pendaftaran berhasil. Silakan masuk dengan email dan password yang sudah kamu buat.</span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${param.error}">
+                <span class="alert__icon" aria-hidden="true">✕</span>
+                <span>Email atau password tidak tepat. Periksa kembali input kamu, lalu coba lagi.</span>
+            </div>
+
+            <section class="card auth-card" aria-labelledby="login-title">
+                <p class="eyebrow">Selamat datang kembali</p>
+                <h1 id="login-title">Masuk ke INT BANK</h1>
+                <p class="muted">Kelola rekening dan transaksi simulasi kamu.</p>
+
+                <form th:action="@{/login}" method="post" class="form">
+                    <div class="field">
+                        <label for="username">Email</label>
+                        <input id="username" name="username" type="email" autocomplete="username" inputmode="email" placeholder="nama@contoh.com" required>
+                    </div>
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Masukkan password" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--block btn--lg">Masuk <span aria-hidden="true">→</span></button>
+                </form>
+
+                <p class="auth-card__foot">Belum punya akun? <a th:href="@{/register}" href="/register">Daftar sekarang</a></p>
+                <p class="fineprint"><span aria-hidden="true">⚠</span> Simulasi akademik — jangan pakai kredensial bank sungguhan.</p>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Kelola Nasabah')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head page-head--row">
+                <div>
+                    <p class="eyebrow">Administrator</p>
+                    <h1>Data nasabah</h1>
+                    <p class="muted">Cari nasabah dan buka detail untuk mengelola statusnya.</p>
+                </div>
+                <a class="btn btn--secondary" th:href="@{/admin/dashboard}" href="/admin/dashboard">← Dashboard</a>
+            </header>
+
+            <section class="card" aria-labelledby="customer-search-title">
+                <h2 id="customer-search-title">Pencarian</h2>
+                <form th:action="@{/admin/nasabah}" method="get" class="filter-bar">
+                    <div class="field field--grow">
+                        <label for="keyword">Nama, email, atau nomor rekening</label>
+                        <input id="keyword" type="search" name="keyword" th:value="${keyword}" placeholder="Cari nasabah">
+                    </div>
+                    <div class="filter-bar__actions">
+                        <button type="submit" class="btn btn--primary">Cari</button>
+                        <a class="btn btn--ghost" th:href="@{/admin/nasabah}" href="/admin/nasabah">Reset</a>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card" aria-labelledby="customer-list-title">
+                <div class="card__head">
+                    <h2 id="customer-list-title">Daftar nasabah</h2>
+                    <span class="muted">Halaman <span th:text="${page.number + 1}">1</span> dari <span th:text="${page.totalPages}">1</span></span>
+                </div>
+                <div class="table-wrap" th:if="${page != null and !page.content.isEmpty()}">
+                    <table class="table table--dense">
+                        <thead>
+                        <tr>
+                            <th scope="col">Nama</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Telepon</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="amount">Jumlah rekening</th>
+                            <th scope="col" class="amount">Total saldo</th>
+                            <th scope="col"><span class="visually-hidden">Aksi</span></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="c : ${page.content}">
+                            <td><strong th:text="${c.fullName}">Nama nasabah</strong></td>
+                            <td th:text="${c.email}">email@contoh.com</td>
+                            <td th:text="${c.phone}">08xxxxxxxxxx</td>
+                            <td>
+                                <span class="badge" th:classappend="${c.enabled} ? 'badge--success' : 'badge--danger'" th:text="${c.enabled} ? 'Aktif' : 'Nonaktif'">Aktif</span>
+                            </td>
+                            <td class="amount" th:text="${c.accountCount}">0</td>
+                            <td class="amount" th:text="${c.totalBalanceFormatted}">Rp0</td>
+                            <td>
+                                <a class="link-arrow" th:href="@{/admin/nasabah/{id}(id=${c.id})}" href="/admin/nasabah/">Detail <span aria-hidden="true">→</span></a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="empty-state" th:if="${page == null or page.content.isEmpty()}">Tidak ada nasabah yang cocok dengan pencarian.</p>
+
+                <nav class="pagination" aria-label="Navigasi halaman" th:if="${page != null and page.totalPages > 1}">
+                    <a class="btn btn--secondary btn--sm" th:if="${page.hasPrevious()}" th:href="@{/admin/nasabah(page=${page.number - 1}, keyword=${keyword})}" href="/admin/nasabah">← Sebelumnya</a>
+                    <span class="pagination__info" th:each="p : ${#numbers.sequence(0, page.totalPages - 1)}">
+                        <a th:if="${p != page.number}" class="pagination__link amount" th:href="@{/admin/nasabah(page=${p}, keyword=${keyword})}" th:text="${p + 1}" href="/admin/nasabah">1</a>
+                        <span th:if="${p == page.number}" class="pagination__link pagination__link--current amount" th:text="${p + 1}" aria-current="page">1</span>
+                    </span>
+                    <a class="btn btn--secondary btn--sm" th:if="${page.hasNext()}" th:href="@{/admin/nasabah(page=${page.number + 1}, keyword=${keyword})}" href="/admin/nasabah">Berikutnya →</a>
+                </nav>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

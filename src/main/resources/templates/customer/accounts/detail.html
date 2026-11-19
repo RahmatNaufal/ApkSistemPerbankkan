@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Detail Rekening')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head page-head--row">
+                <div>
+                    <p class="eyebrow">Detail rekening</p>
+                    <h1 th:text="${account.typeName}">Jenis rekening</h1>
+                    <p class="muted mono" th:text="${account.maskedNumber}">•••• 0000</p>
+                </div>
+                <a class="btn btn--secondary" th:href="@{/nasabah/dashboard}" href="/nasabah/dashboard">← Kembali ke dashboard</a>
+            </header>
+
+            <section class="balance-card" aria-labelledby="balance-title">
+                <div>
+                    <p class="balance-card__label" id="balance-title">Saldo tersedia</p>
+                    <p class="balance-card__amount amount" th:text="${account.balanceFormatted}">Rp0</p>
+                    <p class="balance-card__note">Nomor rekening: <span class="mono" th:text="${account.accountNumber}">0000000000</span></p>
+                </div>
+                <span class="badge badge--on-dark" th:classappend="${account.status != null and account.status == 'ACTIVE'} ? 'badge--success' : 'badge--danger'" th:text="${account.statusLabel}">Aktif</span>
+            </section>
+
+            <div class="grid grid--2">
+                <section class="card" aria-labelledby="rules-title">
+                    <h2 id="rules-title">Aturan jenis rekening</h2>
+                    <dl class="detail-list">
+                        <div>
+                            <dt>Saldo minimum</dt>
+                            <dd class="amount" th:text="${account.minimumBalanceFormatted}">Rp0</dd>
+                        </div>
+                        <div>
+                            <dt>Biaya tarik / transfer</dt>
+                            <dd class="amount" th:text="${account.feeFormatted}">Rp0</dd>
+                        </div>
+                        <div>
+                            <dt>Aturan bunga</dt>
+                            <dd th:text="${account.interestRule}">Sesuai jenis rekening</dd>
+                        </div>
+                        <div th:if="${account.maturityDateFormatted != null}">
+                            <dt>Jatuh tempo</dt>
+                            <dd th:text="${account.maturityDateFormatted}">Tanggal</dd>
+                        </div>
+                    </dl>
+                </section>
+
+                <section class="card card--cream" aria-labelledby="interest-title">
+                    <p class="eyebrow">Proyeksi, bukan posting</p>
+                    <h2 id="interest-title">Proyeksi bunga</h2>
+                    <p class="interest-value amount" th:text="${account.interestProjectionFormatted}">Rp0</p>
+                    <p class="muted">Angka ini hanya ilustrasi hasil perhitungan bunga sesuai aturan jenis rekening. Bunga tidak ditambahkan ke saldo pada simulasi ini.</p>
+                </section>
+            </div>
+
+            <section class="card" aria-labelledby="tx-title">
+                <div class="card__head">
+                    <h2 id="tx-title">Transaksi rekening ini</h2>
+                    <a class="link-arrow" th:href="@{/nasabah/transaksi/riwayat}" href="/nasabah/transaksi/riwayat">Lihat semua <span aria-hidden="true">→</span></a>
+                </div>
+                <div class="table-wrap" th:if="${transactions != null and !transactions.isEmpty()}">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Tanggal</th>
+                            <th scope="col">Jenis</th>
+                            <th scope="col">Referensi</th>
+                            <th scope="col" class="amount">Nominal</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="tx : ${transactions}">
+                            <td th:text="${tx.createdAtFormatted}">Tanggal</td>
+                            <td>
+                                <span class="flow-icon" th:text="${tx.direction == 'IN' ? '↓' : (tx.direction == 'OUT' ? '↑' : '•')}" aria-hidden="true">•</span>
+                                <span th:text="${tx.typeLabel}">Jenis transaksi</span>
+                            </td>
+                            <td class="mono" th:text="${tx.referenceNumber}">REF</td>
+                            <td class="amount" th:text="${tx.amountFormatted}">Rp0</td>
+                            <td>
+                                <span class="badge" th:classappend="${tx.status != null and tx.status == 'SUCCESS'} ? 'badge--success' : 'badge--neutral'" th:text="${tx.statusLabel}">Berhasil</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="empty-state" th:if="${transactions == null or transactions.isEmpty()}">Belum ada transaksi pada rekening ini.</p>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

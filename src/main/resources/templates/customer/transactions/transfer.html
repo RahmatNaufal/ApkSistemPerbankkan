@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Transfer')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page page--narrow">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head page-head--row">
+                <div>
+                    <p class="eyebrow">Transaksi · simulasi</p>
+                    <h1>Transfer internal</h1>
+                    <p class="muted">Kirim dana ke rekening INT BANK lain. Pengiriman ulang tidak akan memproses transaksi dua kali.</p>
+                </div>
+                <a class="btn btn--secondary" th:href="@{/nasabah/dashboard}" href="/nasabah/dashboard">← Kembali</a>
+            </header>
+
+            <form th:action="@{/nasabah/transaksi/transfer}" th:object="${transferRequest}" method="post" class="form-stack" data-confirm="Kirim transfer ini sekarang? Pastikan nomor rekening tujuan sudah benar.">
+                <input type="hidden" th:field="*{idempotencyKey}">
+
+                <section class="card">
+                    <h2>Detail transfer</h2>
+                    <div class="field">
+                        <label for="sourceAccountNumber">Rekening sumber</label>
+                        <select id="sourceAccountNumber" th:field="*{sourceAccountNumber}">
+                            <option value="">Pilih rekening</option>
+                            <option th:each="acc : ${accounts}" th:value="${acc.accountNumber}" th:text="${acc.typeName} + ' · ' + ${acc.maskedNumber} + ' · ' + ${acc.balanceFormatted}">Rekening</option>
+                        </select>
+                        <p class="error" th:if="${#fields.hasErrors('sourceAccountNumber')}" th:errors="*{sourceAccountNumber}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="destinationAccountNumber">Nomor rekening tujuan</label>
+                        <input id="destinationAccountNumber" type="text" inputmode="numeric" th:field="*{destinationAccountNumber}" placeholder="10 digit nomor rekening" autocomplete="off">
+                        <p class="hint">Tujuan harus aktif dan bukan rekening sumber.</p>
+                        <p class="error" th:if="${#fields.hasErrors('destinationAccountNumber')}" th:errors="*{destinationAccountNumber}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="amount">Nominal transfer (Rp)</label>
+                        <input id="amount" type="text" inputmode="numeric" data-rupiah th:field="*{amount}" placeholder="250000">
+                        <p class="error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+                    </div>
+                </section>
+
+                <section class="card card--cream">
+                    <h2>Ringkasan tujuan</h2>
+                    <dl class="detail-list">
+                        <div><dt>Dari rekening</dt><dd class="mono" th:text="*{sourceAccountNumber} ?: '-'">-</dd></div>
+                        <div>
+                            <dt>Ke rekening</dt>
+                            <dd class="mono" th:text="${destMasked} ?: '-'">••••••0000</dd>
+                        </div>
+                        <div><dt>Nama penerima</dt><dd>Ditampilkan pada bukti transaksi jika tersedia</dd></div>
+                        <div><dt>Nominal</dt><dd class="amount" th:text="*{amount} ?: '-'">-</dd></div>
+                        <div><dt>Biaya</dt><dd>Sesuai aturan jenis rekening sumber</dd></div>
+                    </dl>
+                    <p class="fineprint"><span aria-hidden="true">✓</span> Kunci idempotensi disertakan otomatis untuk mencegah dobel transfer.</p>
+                    <button type="submit" class="btn btn--accent btn--lg">Lanjut Konfirmasi <span aria-hidden="true">→</span></button>
+                </section>
+            </form>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

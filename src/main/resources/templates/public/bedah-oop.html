@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Bedah OOP')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head">
+                <p class="eyebrow">Proyek OOP · INT BANK</p>
+                <h1>Bedah Object-Oriented Programming</h1>
+                <p class="lead">Empat pilar OOP tidak hanya dijelaskan, tetapi dipakai langsung oleh logika rekening di bawah ini. Gunakan simulator di halaman ini untuk melihat polimorfisme bekerja.</p>
+            </header>
+
+            <div class="notice" role="note">
+                <span class="notice__icon" aria-hidden="true">⚠</span>
+                <p><strong>Hanya simulasi.</strong> Simulator ini membaca data contoh dan tidak menyentuh saldo asli, tidak menyimpan transaksi, serta tidak mengubah rekening mana pun.</p>
+            </div>
+
+            <section class="pillars" aria-label="Empat pilar OOP">
+                <article class="card pillar">
+                    <span class="pillar__no amount">01</span>
+                    <h2>Enkapsulasi</h2>
+                    <p>Data saldo dan status disembunyikan di dalam objek, sehingga hanya bisa diubah lewat method yang selalu memvalidasi aturan.</p>
+                    <pre class="code"><code>private Money balance;
+
+public final void credit(Money amount) {
+    validateCredit(amount);
+    balance = balance.plus(amount);
+}</code></pre>
+                    <p class="source">Sumber: <code>Account.java</code></p>
+                </article>
+
+                <article class="card pillar">
+                    <span class="pillar__no amount">02</span>
+                    <h2>Abstraksi</h2>
+                    <p>Kelas induk mendefinisikan kontrak umum seluruh rekening, sementara detail teknisnya diserahkan ke kelas turunan.</p>
+                    <pre class="code"><code>public abstract class Account {
+    public abstract String typeName();
+    protected abstract Money minimumBalance();
+    protected abstract Money projectedInterest(int months);
+}</code></pre>
+                    <p class="source">Sumber: <code>Account.java</code></p>
+                </article>
+
+                <article class="card pillar">
+                    <span class="pillar__no amount">03</span>
+                    <h2>Pewarisan</h2>
+                    <p>Tabungan, Giro, dan Deposito mewarisi aturan umum dari <code>Account</code>, lalu mengisi bagian yang berbeda sesuai jenisnya.</p>
+                    <pre class="code"><code>public class SavingsAccount extends Account {
+    @Override public String typeName() {
+        return "Tabungan";
+    }
+}</code></pre>
+                    <p class="source">Sumber: <code>SavingsAccount.java</code></p>
+                </article>
+
+                <article class="card pillar">
+                    <span class="pillar__no amount">04</span>
+                    <h2>Polimorfisme</h2>
+                    <p>Satu panggilan method menghasilkan perilaku berbeda pada tiap jenis rekening, tanpa perlu memeriksa tipenya satu per satu.</p>
+                    <pre class="code"><code>// satu panggilan, tiga perilaku
+account.validateWithdraw(amount, today);
+// Tabungan → saldo minimum Rp50.000
+// Giro     → biaya Rp2.500
+// Deposito → hanya penuh setelah jatuh tempo</code></pre>
+                    <p class="source">Sumber: <code>Account.java</code>, <code>DepositAccount.java</code></p>
+                </article>
+            </section>
+
+            <section class="card hierarchy" aria-labelledby="hierarchy-title">
+                <h2 id="hierarchy-title">Peta pewarisan rekening</h2>
+                <pre class="diagram"><code>Account  (abstrak · template method)
+├── SavingsAccount  → Tabungan   · min. Rp50.000 · bunga 3% p.a. · tanpa biaya
+├── CurrentAccount  → Giro       · min. Rp0      · tanpa bunga · biaya Rp2.500
+└── DepositAccount  → Deposito   · dana awal saja · bunga 5% p.a. · cair penuh saat jatuh tempo</code></pre>
+            </section>
+
+            <section class="card simulator" aria-labelledby="simulator-title">
+                <p class="eyebrow">Coba sendiri</p>
+                <h2 id="simulator-title">Simulator penarikan polimorfik</h2>
+                <p class="muted">Masukkan saldo dan nominal tarik, lalu bandingkan hasil ketiga jenis rekening.</p>
+
+                <form th:action="@{/bedah-oop}" method="get" class="form form--inline">
+                    <div class="field">
+                        <label for="saldo">Saldo contoh (Rp)</label>
+                        <input id="saldo" name="saldo" type="text" inputmode="numeric" data-rupiah th:value="${saldo}" placeholder="1000000">
+                    </div>
+                    <div class="field">
+                        <label for="nominal">Nominal tarik (Rp)</label>
+                        <input id="nominal" name="nominal" type="text" inputmode="numeric" data-rupiah th:value="${nominal}" placeholder="200000">
+                    </div>
+                    <button type="submit" class="btn btn--primary">Jalankan Simulasi <span aria-hidden="true">→</span></button>
+                </form>
+
+                <div class="table-wrap" th:if="${simulasi != null}">
+                    <table class="table">
+                        <caption class="visually-hidden">Hasil simulasi penarikan per jenis rekening</caption>
+                        <thead>
+                        <tr>
+                            <th scope="col">Jenis</th>
+                            <th scope="col">Hasil</th>
+                            <th scope="col">Alasan</th>
+                            <th scope="col" class="amount">Biaya</th>
+                            <th scope="col" class="amount">Saldo akhir</th>
+                            <th scope="col" class="amount">Proyeksi bunga</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${simulasi}">
+                            <th scope="row" th:text="${item.jenis}">Tabungan</th>
+                            <td>
+                                <span class="badge" th:classappend="${item.status != null and (#strings.contains(#strings.toLowerCase(item.status), 'gagal') or #strings.contains(#strings.toLowerCase(item.status), 'ditolak'))} ? 'badge--danger' : 'badge--success'" th:text="${item.status}">Berhasil</span>
+                            </td>
+                            <td th:text="${item.alasan}">Alasan</td>
+                            <td class="amount" th:text="${item.biaya}">Rp0</td>
+                            <td class="amount" th:text="${item.saldoAkhir}">Rp0</td>
+                            <td class="amount" th:text="${item.bunga}">Rp0</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="empty-state" th:if="${simulasi == null}">Isi saldo dan nominal, lalu jalankan simulasi untuk melihat perbandingan hasil.</p>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

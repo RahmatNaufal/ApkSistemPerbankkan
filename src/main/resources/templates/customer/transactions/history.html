@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Riwayat Transaksi')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head page-head--row">
+                <div>
+                    <p class="eyebrow">Aktivitas · nasabah</p>
+                    <h1>Riwayat transaksi</h1>
+                    <p class="muted">Cari dan filter transaksi yang berkaitan dengan rekening kamu.</p>
+                </div>
+                <a class="btn btn--secondary" th:href="@{/nasabah/dashboard}" href="/nasabah/dashboard">← Kembali</a>
+            </header>
+
+            <section class="card" aria-labelledby="filter-title">
+                <h2 id="filter-title">Filter</h2>
+                <form th:action="@{/nasabah/transaksi/riwayat}" method="get" class="filter-bar">
+                    <div class="field field--grow">
+                        <label for="keyword">Kata kunci</label>
+                        <input id="keyword" type="search" name="keyword" th:value="${keyword}" placeholder="Referensi atau keterangan">
+                    </div>
+                    <div class="field">
+                        <label for="type">Jenis</label>
+                        <select id="type" name="type">
+                            <option value="">Semua jenis</option>
+                            <option value="DEPOSIT" th:selected="${type == 'DEPOSIT'}">Setor dana</option>
+                            <option value="WITHDRAWAL" th:selected="${type == 'WITHDRAWAL'}">Tarik dana</option>
+                            <option value="TRANSFER_IN" th:selected="${type == 'TRANSFER_IN'}">Transfer masuk</option>
+                            <option value="TRANSFER_OUT" th:selected="${type == 'TRANSFER_OUT'}">Transfer keluar</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="">Semua status</option>
+                            <option value="SUCCESS" th:selected="${status == 'SUCCESS'}">Berhasil</option>
+                            <option value="PENDING" th:selected="${status == 'PENDING'}">Diproses</option>
+                            <option value="FAILED" th:selected="${status == 'FAILED'}">Gagal</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="fromDate">Dari tanggal</label>
+                        <input id="fromDate" type="date" name="fromDate" th:value="${fromDate}">
+                    </div>
+                    <div class="field">
+                        <label for="toDate">Sampai tanggal</label>
+                        <input id="toDate" type="date" name="toDate" th:value="${toDate}">
+                    </div>
+                    <div class="filter-bar__actions">
+                        <button type="submit" class="btn btn--primary">Terapkan</button>
+                        <a class="btn btn--ghost" th:href="@{/nasabah/transaksi/riwayat}" href="/nasabah/transaksi/riwayat">Reset</a>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card" aria-labelledby="history-title">
+                <div class="card__head">
+                    <h2 id="history-title">Daftar transaksi</h2>
+                    <span class="muted">Halaman <span th:text="${page.number + 1}">1</span> dari <span th:text="${page.totalPages}">1</span></span>
+                </div>
+
+                <div class="table-wrap" th:if="${page != null and !page.content.isEmpty()}">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Tanggal</th>
+                            <th scope="col">Jenis</th>
+                            <th scope="col">Referensi</th>
+                            <th scope="col" class="amount">Nominal</th>
+                            <th scope="col">Status</th>
+                            <th scope="col"><span class="visually-hidden">Bukti</span></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="tx : ${page.content}">
+                            <td th:text="${tx.createdAtFormatted}">Tanggal</td>
+                            <td>
+                                <span class="flow-icon" th:text="${tx.direction == 'IN' ? '↓' : (tx.direction == 'OUT' ? '↑' : '•')}" aria-hidden="true">•</span>
+                                <span th:text="${tx.typeLabel}">Jenis transaksi</span>
+                            </td>
+                            <td class="mono" th:text="${tx.referenceNumber}">REF</td>
+                            <td class="amount" th:text="${tx.amountFormatted}">Rp0</td>
+                            <td>
+                                <span class="badge" th:classappend="${tx.status != null and tx.status == 'SUCCESS'} ? 'badge--success' : 'badge--neutral'" th:text="${tx.statusLabel}">Berhasil</span>
+                            </td>
+                            <td>
+                                <a class="link-arrow" th:href="@{/nasabah/transaksi/bukti/{referenceNumber}(referenceNumber=${tx.referenceNumber})}" href="/nasabah/transaksi/bukti/">Bukti <span aria-hidden="true">→</span></a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="empty-state" th:if="${page == null or page.content.isEmpty()}">Tidak ada transaksi yang cocok dengan filter.</p>
+
+                <nav class="pagination" aria-label="Navigasi halaman" th:if="${page != null and page.totalPages > 1}">
+                    <a class="btn btn--secondary btn--sm" th:if="${page.hasPrevious()}" th:href="@{/nasabah/transaksi/riwayat(page=${page.number - 1}, keyword=${keyword}, type=${type}, status=${status}, fromDate=${fromDate}, toDate=${toDate})}" href="/nasabah/transaksi/riwayat">← Sebelumnya</a>
+                    <span class="pagination__info" th:each="p : ${#numbers.sequence(0, page.totalPages - 1)}">
+                        <a th:if="${p != page.number}" class="pagination__link amount" th:href="@{/nasabah/transaksi/riwayat(page=${p}, keyword=${keyword}, type=${type}, status=${status}, fromDate=${fromDate}, toDate=${toDate})}" th:text="${p + 1}" href="/nasabah/transaksi/riwayat">1</a>
+                        <span th:if="${p == page.number}" class="pagination__link pagination__link--current amount" th:text="${p + 1}" aria-current="page">1</span>
+                    </span>
+                    <a class="btn btn--secondary btn--sm" th:if="${page.hasNext()}" th:href="@{/nasabah/transaksi/riwayat(page=${page.number + 1}, keyword=${keyword}, type=${type}, status=${status}, fromDate=${fromDate}, toDate=${toDate})}" href="/nasabah/transaksi/riwayat">Berikutnya →</a>
+                </nav>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

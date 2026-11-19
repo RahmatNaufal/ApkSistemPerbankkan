@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Detail Nasabah')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head page-head--row">
+                <div>
+                    <p class="eyebrow">Administrator · detail nasabah</p>
+                    <h1 th:text="${customer.fullName}">Nama nasabah</h1>
+                    <p class="muted" th:text="${customer.email}">email@contoh.com</p>
+                </div>
+                <a class="btn btn--secondary" th:href="@{/admin/nasabah}" href="/admin/nasabah">← Kembali ke daftar</a>
+            </header>
+
+            <div class="grid grid--2">
+                <section class="card" aria-labelledby="cust-info-title">
+                    <h2 id="cust-info-title">Informasi nasabah</h2>
+                    <dl class="detail-list">
+                        <div><dt>Nama lengkap</dt><dd th:text="${customer.fullName}">Nama nasabah</dd></div>
+                        <div><dt>Email</dt><dd th:text="${customer.email}">email@contoh.com</dd></div>
+                        <div><dt>Telepon</dt><dd th:text="${customer.phone}">08xxxxxxxxxx</dd></div>
+                        <div><dt>Alamat</dt><dd th:text="${customer.address} ?: '-'">Alamat</dd></div>
+                        <div><dt>Bergabung</dt><dd th:text="${customer.createdAtFormatted}">Tanggal</dd></div>
+                        <div><dt>Status akun</dt><dd><span class="badge" th:classappend="${customer.enabled} ? 'badge--success' : 'badge--danger'" th:text="${customer.enabled} ? 'Aktif' : 'Nonaktif'">Aktif</span></dd></div>
+                        <div><dt>Jumlah rekening</dt><dd class="amount" th:text="${customer.accountCount}">0</dd></div>
+                        <div><dt>Total saldo</dt><dd class="amount" th:text="${customer.totalBalanceFormatted}">Rp0</dd></div>
+                    </dl>
+                </section>
+
+                <section class="card" aria-labelledby="status-form-title">
+                    <h2 id="status-form-title">Ubah status nasabah</h2>
+                    <p class="muted">Perubahan status tercatat di audit log. Sertakan alasan, terutama untuk pemblokiran.</p>
+                    <form th:action="@{/admin/nasabah/{id}/status(id=${customer.id})}" method="post" class="form" data-confirm="Ubah status nasabah ini? Pastikan alasan sudah benar.">
+                        <div class="field">
+                            <label for="status">Status baru</label>
+                            <select id="status" name="status" required>
+                                <option value="">Pilih status</option>
+                                <option th:each="option : ${statusOptions}" th:value="${option}" th:text="${option}">STATUS</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="reason">Alasan perubahan</label>
+                            <textarea id="reason" name="reason" rows="3" placeholder="Contoh: permintaan nasabah, verifikasi gagal" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--block">Simpan Perubahan</button>
+                    </form>
+                    <p class="fineprint"><span aria-hidden="true">⚠</span> Aksi admin bersifat sensitif dan memerlukan konfirmasi.</p>
+                </section>
+            </div>
+
+            <section class="card" aria-labelledby="cust-accounts-title">
+                <h2 id="cust-accounts-title">Rekening nasabah</h2>
+                <div class="table-wrap" th:if="${accounts != null and !accounts.isEmpty()}">
+                    <table class="table table--dense">
+                        <thead>
+                        <tr>
+                            <th scope="col">Jenis</th>
+                            <th scope="col">Nomor</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="amount">Saldo</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="acc : ${accounts}">
+                            <td th:text="${acc.typeName}">Jenis rekening</td>
+                            <td class="mono" th:text="${acc.maskedNumber}">•••• 0000</td>
+                            <td>
+                                <span class="badge" th:classappend="${acc.status != null and acc.status == 'ACTIVE'} ? 'badge--success' : 'badge--danger'" th:text="${acc.statusLabel}">Aktif</span>
+                            </td>
+                            <td class="amount" th:text="${acc.balanceFormatted}">Rp0</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="empty-state" th:if="${accounts == null or accounts.isEmpty()}">Nasabah ini belum memiliki rekening.</p>
+            </section>
+
+            <section class="card" aria-labelledby="cust-audit-title">
+                <h2 id="cust-audit-title">Riwayat audit nasabah ini</h2>
+                <div class="table-wrap" th:if="${auditLogs != null and !auditLogs.isEmpty()}">
+                    <table class="table table--dense">
+                        <thead>
+                        <tr>
+                            <th scope="col">Waktu</th>
+                            <th scope="col">Aksi</th>
+                            <th scope="col">Alasan</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="log : ${auditLogs}">
+                            <td th:text="${log.createdAtFormatted}">Waktu</td>
+                            <td th:text="${log.action}">Aksi</td>
+                            <td th:text="${log.reason} ?: '-'">Alasan</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="empty-state" th:if="${auditLogs == null or auditLogs.isEmpty()}">Belum ada catatan audit untuk nasabah ini.</p>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

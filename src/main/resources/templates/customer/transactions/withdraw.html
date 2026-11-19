@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Tarik Dana')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page page--narrow">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head page-head--row">
+                <div>
+                    <p class="eyebrow">Transaksi · simulasi</p>
+                    <h1>Tarik dana</h1>
+                    <p class="muted">Ambil dana dari rekening kamu dengan memperhatikan aturan jenisnya.</p>
+                </div>
+                <a class="btn btn--secondary" th:href="@{/nasabah/dashboard}" href="/nasabah/dashboard">← Kembali</a>
+            </header>
+
+            <div class="notice" role="note">
+                <span class="notice__icon" aria-hidden="true">⚠</span>
+                <p><strong>Perlu diperhatikan:</strong> Tabungan wajib menyisakan saldo minimum Rp50.000. Giro dikenai biaya Rp2.500 per penarikan. Deposito hanya bisa dicairkan penuh setelah jatuh tempo.</p>
+            </div>
+
+            <form th:action="@{/nasabah/transaksi/tarik}" th:object="${withdrawRequest}" method="post" class="form-stack" data-confirm="Tarik dana ini sekarang? Pastikan saldo minimum dan biaya sudah sesuai aturan.">
+                <section class="card">
+                    <h2>Detail penarikan</h2>
+                    <div class="field">
+                        <label for="accountNumber">Rekening sumber</label>
+                        <select id="accountNumber" th:field="*{accountNumber}">
+                            <option value="">Pilih rekening</option>
+                            <option th:each="acc : ${accounts}" th:value="${acc.accountNumber}" th:text="${acc.typeName} + ' · ' + ${acc.maskedNumber} + ' · ' + ${acc.balanceFormatted}">Rekening</option>
+                        </select>
+                        <p class="error" th:if="${#fields.hasErrors('accountNumber')}" th:errors="*{accountNumber}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="amount">Nominal tarik (Rp)</label>
+                        <input id="amount" type="text" inputmode="numeric" data-rupiah th:field="*{amount}" placeholder="100000">
+                        <p class="hint">Penarikan ditolak bila saldo tidak mencukupi setelah biaya dan saldo minimum.</p>
+                        <p class="error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+                    </div>
+                </section>
+
+                <section class="card card--cream">
+                    <h2>Ringkasan sebelum konfirmasi</h2>
+                    <dl class="detail-list">
+                        <div><dt>Rekening sumber</dt><dd class="mono" th:text="*{accountNumber} ?: '-'">-</dd></div>
+                        <div><dt>Nominal</dt><dd class="amount" th:text="*{amount} ?: '-'">-</dd></div>
+                        <div><dt>Biaya</dt><dd>Sesuai aturan jenis rekening (Giro Rp2.500)</dd></div>
+                    </dl>
+                    <p class="fineprint"><span aria-hidden="true">✓</span> Server memeriksa saldo tersedia dan saldo minimum sebelum menyetujui.</p>
+                    <button type="submit" class="btn btn--accent btn--lg">Konfirmasi Tarik <span aria-hidden="true">→</span></button>
+                </section>
+            </form>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

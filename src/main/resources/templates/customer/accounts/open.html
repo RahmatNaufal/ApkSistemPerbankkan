@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Buka Rekening')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head page-head--row">
+                <div>
+                    <p class="eyebrow">Layanan rekening</p>
+                    <h1>Buka rekening baru</h1>
+                    <p class="muted">Pilih jenis, tentukan dana awal, lalu konfirmasi. Semua perubahan diproses di server.</p>
+                </div>
+                <a class="btn btn--secondary" th:href="@{/nasabah/dashboard}" href="/nasabah/dashboard">← Kembali</a>
+            </header>
+
+            <form th:action="@{/nasabah/rekening/buka}" th:object="${openAccountRequest}" method="post" class="form-stack" data-confirm="Buka rekening baru dengan pilihan ini?">
+                <section class="card" aria-labelledby="type-title">
+                    <h2 id="type-title">1. Pilih jenis rekening</h2>
+                    <div class="radio-grid">
+                        <label class="radio-card" th:each="type : ${types}">
+                            <input type="radio" th:field="*{type}" th:value="${type['value']}">
+                            <span class="radio-card__body">
+                                <strong th:text="${type['label']}">Jenis rekening</strong>
+                                <span class="muted" th:text="${type['description']}">Deskripsi singkat aturan rekening.</span>
+                            </span>
+                            <span class="radio-card__check" aria-hidden="true">✓</span>
+                        </label>
+                    </div>
+                    <p class="error" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></p>
+                </section>
+
+                <section class="card" aria-labelledby="tenor-title">
+                    <h2 id="tenor-title">2. Tenor <span class="muted">(khusus Deposito)</span></h2>
+                    <p class="muted">Pilih 3, 6, atau 12 bulan. Untuk Tabungan dan Giro, tenor tidak digunakan.</p>
+                    <div class="segmented">
+                        <label class="segment"><input type="radio" th:field="*{tenorMonths}" value="3"><span>3 bulan</span></label>
+                        <label class="segment"><input type="radio" th:field="*{tenorMonths}" value="6"><span>6 bulan</span></label>
+                        <label class="segment"><input type="radio" th:field="*{tenorMonths}" value="12"><span>12 bulan</span></label>
+                    </div>
+                    <p class="error" th:if="${#fields.hasErrors('tenorMonths')}" th:errors="*{tenorMonths}"></p>
+                </section>
+
+                <section class="card" aria-labelledby="fund-title">
+                    <h2 id="fund-title">3. Dana awal</h2>
+                    <p class="muted">Untuk Deposito, nominal dipindahkan dari rekening sumber yang kamu pilih.</p>
+                    <div class="field">
+                        <label for="sourceAccountNumber">Rekening sumber dana</label>
+                        <select id="sourceAccountNumber" th:field="*{sourceAccountNumber}">
+                            <option value="">Pilih rekening</option>
+                            <option th:each="acc : ${accounts}" th:value="${acc.accountNumber}" th:text="${acc.typeName} + ' · ' + ${acc.maskedNumber} + ' · ' + ${acc.balanceFormatted}">Rekening</option>
+                        </select>
+                        <p class="error" th:if="${#fields.hasErrors('sourceAccountNumber')}" th:errors="*{sourceAccountNumber}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="amount">Nominal dana awal (Rp)</label>
+                        <input id="amount" type="text" inputmode="numeric" data-rupiah th:field="*{amount}" placeholder="1000000">
+                        <p class="hint">Masukkan angka tanpa satuan. Format Rupiah akan ditampilkan otomatis.</p>
+                        <p class="error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></p>
+                    </div>
+                </section>
+
+                <section class="card card--cream" aria-labelledby="summary-title">
+                    <h2 id="summary-title">Ringkasan</h2>
+                    <dl class="detail-list">
+                        <div><dt>Jenis</dt><dd th:text="*{type} ?: '-'">-</dd></div>
+                        <div><dt>Tenor</dt><dd th:text="*{tenorMonths} ?: '-'">-</dd></div>
+                        <div><dt>Rekening sumber</dt><dd class="mono" th:text="*{sourceAccountNumber} ?: '-'">-</dd></div>
+                        <div><dt>Nominal</dt><dd class="amount" th:text="*{amount} ?: '-'">-</dd></div>
+                    </dl>
+                    <p class="fineprint"><span aria-hidden="true">✓</span> Validasi akhir (saldo, status rekening, dan aturan jenis) tetap dilakukan server.</p>
+                    <button type="submit" class="btn btn--accent btn--lg">Konfirmasi Buka Rekening <span aria-hidden="true">→</span></button>
+                </section>
+            </form>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

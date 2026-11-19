@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Audit Log')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head page-head--row">
+                <div>
+                    <p class="eyebrow">Administrator · keamanan</p>
+                    <h1>Audit log</h1>
+                    <p class="muted">Catatan aktivitas admin dan perubahan penting pada sistem simulasi.</p>
+                </div>
+                <a class="btn btn--secondary" th:href="@{/admin/dashboard}" href="/admin/dashboard">← Dashboard</a>
+            </header>
+
+            <section class="card" aria-labelledby="audit-filter-title">
+                <h2 id="audit-filter-title">Filter</h2>
+                <form th:action="@{/admin/audit}" method="get" class="filter-bar">
+                    <div class="field field--grow">
+                        <label for="actor">Aktor</label>
+                        <input id="actor" type="search" name="actor" th:value="${actor}" placeholder="Email admin">
+                    </div>
+                    <div class="field field--grow">
+                        <label for="action">Aksi</label>
+                        <input id="action" type="search" name="action" th:value="${action}" placeholder="Nama aksi">
+                    </div>
+                    <div class="filter-bar__actions">
+                        <button type="submit" class="btn btn--primary">Terapkan</button>
+                        <a class="btn btn--ghost" th:href="@{/admin/audit}" href="/admin/audit">Reset</a>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card" aria-labelledby="audit-title">
+                <div class="card__head">
+                    <h2 id="audit-title">Catatan aktivitas</h2>
+                    <span class="muted">Halaman <span th:text="${page.number + 1}">1</span> dari <span th:text="${page.totalPages}">1</span></span>
+                </div>
+                <div class="table-wrap" th:if="${page != null and !page.content.isEmpty()}">
+                    <table class="table table--dense">
+                        <thead>
+                        <tr>
+                            <th scope="col">Waktu</th>
+                            <th scope="col">Aktor</th>
+                            <th scope="col">Aksi</th>
+                            <th scope="col">Target</th>
+                            <th scope="col">Alasan</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="log : ${page.content}">
+                            <td th:text="${log.createdAtFormatted}">Waktu</td>
+                            <td th:text="${log.actorEmail}">admin@intbank</td>
+                            <td><span class="badge badge--neutral" th:text="${log.action}">AKSI</span></td>
+                            <td>
+                                <span th:text="${log.targetType}">Jenis target</span>
+                                <span class="mono muted" th:text="${log.targetId}">ID</span>
+                            </td>
+                            <td th:text="${log.reason} ?: '-'">Alasan</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="empty-state" th:if="${page == null or page.content.isEmpty()}">Tidak ada catatan audit yang cocok dengan filter.</p>
+
+                <nav class="pagination" aria-label="Navigasi halaman" th:if="${page != null and page.totalPages > 1}">
+                    <a class="btn btn--secondary btn--sm" th:if="${page.hasPrevious()}" th:href="@{/admin/audit(page=${page.number - 1}, actor=${actor}, action=${action})}" href="/admin/audit">← Sebelumnya</a>
+                    <span class="pagination__info" th:each="p : ${#numbers.sequence(0, page.totalPages - 1)}">
+                        <a th:if="${p != page.number}" class="pagination__link amount" th:href="@{/admin/audit(page=${p}, actor=${actor}, action=${action})}" th:text="${p + 1}" href="/admin/audit">1</a>
+                        <span th:if="${p == page.number}" class="pagination__link pagination__link--current amount" th:text="${p + 1}" aria-current="page">1</span>
+                    </span>
+                    <a class="btn btn--secondary btn--sm" th:if="${page.hasNext()}" th:href="@{/admin/audit(page=${page.number + 1}, actor=${actor}, action=${action})}" href="/admin/audit">Berikutnya →</a>
+                </nav>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

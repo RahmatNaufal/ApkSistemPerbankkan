@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Bukti Transaksi')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page page--narrow">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <div class="receipt__toolbar no-print">
+                <a class="btn btn--secondary" th:href="@{/nasabah/transaksi/riwayat}" href="/nasabah/transaksi/riwayat">← Kembali ke riwayat</a>
+                <button type="button" class="btn btn--primary" data-print>Cetak Bukti</button>
+            </div>
+
+            <article class="receipt" aria-labelledby="receipt-title">
+                <header class="receipt__header">
+                    <div class="receipt__brand">
+                        <span class="brand__mark" aria-hidden="true">◆</span>
+                        <div>
+                            <strong>INT BANK</strong>
+                            <small>Sistem Perbankan · Simulasi akademik</small>
+                        </div>
+                    </div>
+                    <span class="badge badge--success" th:text="${transaction.statusLabel} ?: 'Berhasil'">Berhasil</span>
+                </header>
+
+                <div class="receipt__hero">
+                    <p class="eyebrow" id="receipt-title">Bukti transaksi</p>
+                    <h1 th:text="${transaction.typeLabel}">Jenis transaksi</h1>
+                    <p class="receipt__amount amount" th:text="${transaction.amountFormatted}">Rp0</p>
+                    <p class="muted" th:text="${transaction.createdAtFormatted}">Tanggal transaksi</p>
+                </div>
+
+                <dl class="detail-list">
+                    <div><dt>Status</dt><dd th:text="${transaction.statusLabel} ?: 'Berhasil'">Berhasil</dd></div>
+                    <div><dt>Nomor referensi</dt><dd class="mono" th:text="${transaction.referenceNumber}">REF</dd></div>
+                    <div><dt>Keterangan</dt><dd th:text="${transaction.description} ?: '-'">Keterangan transaksi</dd></div>
+                    <div><dt>Rekening tercatat</dt><dd class="mono" th:text="${transaction.accountNumber}">0000000000</dd></div>
+                    <div th:if="${transaction.destinationMasked != null}"><dt>Rekening tujuan</dt><dd class="mono" th:text="${transaction.destinationMasked}">•••• 0000</dd></div>
+                    <div><dt>Biaya</dt><dd class="amount" th:text="${transaction.feeFormatted}">Rp0</dd></div>
+                    <div><dt>Saldo setelah transaksi</dt><dd class="amount" th:text="${transaction.balanceAfterFormatted}">Rp0</dd></div>
+                </dl>
+
+                <section class="receipt__transfer" th:if="${transfer != null}">
+                    <h2>Detail transfer</h2>
+                    <dl class="detail-list">
+                        <div><dt>Referensi transfer</dt><dd class="mono" th:text="${transfer.transferReference}">TRF</dd></div>
+                        <div><dt>Rekening tujuan</dt><dd class="mono" th:text="${transfer.destinationAccountNumberMasked}">•••• 0000</dd></div>
+                        <div><dt>Nama penerima</dt><dd th:text="${transfer.destinationName}">Nama penerima</dd></div>
+                    </dl>
+                </section>
+
+                <footer class="receipt__footer">
+                    <p>Dokumen ini dibuat oleh sistem simulasi INT BANK untuk keperluan pembelajaran. Bukan bukti transaksi bank sungguhan.</p>
+                    <p class="mono" th:text="'INT BANK · ' + ${transaction.referenceNumber}">INT BANK · REF</p>
+                </footer>
+            </article>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

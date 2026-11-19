@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Beranda')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <section class="hero" aria-labelledby="hero-title">
+                <div class="hero__cards" aria-label="Contoh tampilan layanan">
+                    <article class="mini-card">
+                        <span class="tag">Contoh</span>
+                        <span class="mini-card__icon" aria-hidden="true">▦</span>
+                        <h2>Rekening Anda</h2>
+                        <p class="mono">9021 •••• 4471</p>
+                        <p class="muted">Tabungan · Aktif</p>
+                    </article>
+                    <article class="mini-card">
+                        <span class="tag">Contoh</span>
+                        <span class="mini-card__icon" aria-hidden="true">→</span>
+                        <h2>Transfer cepat</h2>
+                        <p>Antar rekening INT BANK</p>
+                        <p class="muted">Tanpa biaya untuk Tabungan</p>
+                    </article>
+                    <article class="mini-card mini-card--ink">
+                        <span class="tag tag--light">Contoh</span>
+                        <span class="mini-card__icon" aria-hidden="true">◇</span>
+                        <h2>Perbankan aman</h2>
+                        <p>Validasi dilakukan di server</p>
+                        <p>Saldo tidak diubah dari browser</p>
+                    </article>
+                    <article class="mini-card">
+                        <span class="tag">Contoh</span>
+                        <span class="mini-card__icon" aria-hidden="true">↻</span>
+                        <h2>Aktivitas terbaru</h2>
+                        <p>Setor dana <span aria-hidden="true">✓</span></p>
+                        <p class="muted">Hari ini, 09:24</p>
+                    </article>
+                    <article class="mini-card">
+                        <span class="tag">Contoh</span>
+                        <span class="mini-card__icon" aria-hidden="true">◈</span>
+                        <h2>Tabungan</h2>
+                        <p>Proyeksi bunga 3% p.a.</p>
+                        <p class="muted">Hanya simulasi, tidak diposting</p>
+                    </article>
+                </div>
+
+                <div class="hero__copy">
+                    <p class="eyebrow">Simulasi perbankan ·INT BANK</p>
+                    <h1 id="hero-title">Perbankan jadi sederhana. Uangmu, kendalimu.</h1>
+                    <p class="lead">Kelola rekening, pantau transaksi, dan lakukan transfer internal dengan pengalaman digital yang sederhana. Semua angka di sini adalah data contoh untuk belajar.</p>
+                    <div class="hero__actions">
+                        <a class="btn btn--accent btn--lg" th:href="@{/register}" href="/register" th:if="${currentUser != true}">Mulai Sekarang <span aria-hidden="true">→</span></a>
+                        <a class="btn btn--accent btn--lg" th:href="@{/nasabah/dashboard}" href="/nasabah/dashboard" th:if="${currentUser == true and isAdmin != true}">Buka Dashboard <span aria-hidden="true">→</span></a>
+                        <a class="btn btn--accent btn--lg" th:href="@{/admin/dashboard}" href="/admin/dashboard" th:if="${currentUser == true and isAdmin == true}">Buka Dashboard Admin <span aria-hidden="true">→</span></a>
+                        <a class="btn btn--secondary btn--lg" th:href="@{/bedah-oop}" href="/bedah-oop">Bedah OOP</a>
+                    </div>
+                    <p class="fineprint"><span aria-hidden="true">⚠</span> Simulasi akademik. Jangan gunakan uang atau data pribadi nyata.</p>
+                </div>
+            </section>
+
+            <section class="metrics" aria-label="Keunggulan">
+                <article class="card metric">
+                    <span class="metric__number amount">03</span>
+                    <div>
+                        <h2>Tiga jenis rekening</h2>
+                        <p>Tabungan, Giro, dan Deposito dengan aturan berbeda dalam satu sistem.</p>
+                    </div>
+                </article>
+                <article class="card metric">
+                    <span class="metric__number amount">04</span>
+                    <div>
+                        <h2>Empat pilar OOP</h2>
+                        <p>Enkapsulasi, abstraksi, pewarisan, dan polimorfisme terlihat langsung di halaman Bedah OOP.</p>
+                    </div>
+                </article>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

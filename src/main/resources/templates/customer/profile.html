@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Profil')}"></head>
+<body>
+<div class="canvas">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="page page--narrow">
+        <div class="wrap">
+            <div class="alert alert--success" role="status" th:if="${successMessage}">
+                <span class="alert__icon" aria-hidden="true">✓</span><span th:text="${successMessage}"></span>
+            </div>
+            <div class="alert alert--danger" role="alert" th:if="${errorMessage}">
+                <span class="alert__icon" aria-hidden="true">✕</span><span th:text="${errorMessage}"></span>
+            </div>
+
+            <header class="page-head page-head--row">
+                <div>
+                    <p class="eyebrow">Akun nasabah</p>
+                    <h1>Profil saya</h1>
+                    <p class="muted">Perbarui data yang diizinkan. Email dan kata sandi dikelola terpisah oleh sistem.</p>
+                </div>
+                <a class="btn btn--secondary" th:href="@{/nasabah/dashboard}" href="/nasabah/dashboard">← Kembali</a>
+            </header>
+
+            <section class="card" aria-labelledby="profile-title">
+                <h2 id="profile-title">Data profil</h2>
+                <div class="field">
+                    <span class="field__label">Email</span>
+                    <p class="readonly" th:text="${email}">nama@contoh.com</p>
+                    <p class="hint">Email digunakan untuk masuk dan tidak dapat diubah dari halaman ini.</p>
+                </div>
+
+                <form th:action="@{/nasabah/profil}" th:object="${profileRequest}" method="post" class="form">
+                    <div class="field">
+                        <label for="fullName">Nama lengkap</label>
+                        <input id="fullName" type="text" th:field="*{fullName}" autocomplete="name">
+                        <p class="error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="phone">Nomor telepon</label>
+                        <input id="phone" type="tel" th:field="*{phone}" autocomplete="tel" inputmode="tel">
+                        <p class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="address">Alamat</label>
+                        <textarea id="address" rows="3" th:field="*{address}" placeholder="Alamat opsional"></textarea>
+                        <p class="error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></p>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--lg">Simpan Perubahan <span aria-hidden="true">→</span></button>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>
